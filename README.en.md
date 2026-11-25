@@ -48,6 +48,13 @@ python -m bigeng web --port 8766
 # http://127.0.0.1:8766
 ```
 
+Run in Docker (the container uses the default port 8000):
+
+```bash
+docker build -t bigeng .
+docker run -p 8000:8000 bigeng
+```
+
 ## Command reference
 
 | Command | What it does |
@@ -66,6 +73,46 @@ python -m bigeng web --port 8766
 | `web [--host] [--port]` | Web UI |
 
 Global switches `--mock`, `--json`, `--model`, `--base-url`, `--api-key`, `--db` work before or after the subcommand. `<draft>` accepts an id or a title.
+
+## 🤔 Why not just ask a general LLM
+
+A general model can make your draft read better. Bigeng adds the three things it cannot:
+
+1. **Changes have to verify** — if a rewrite introduces a number absent from the draft (say, adding "up 30%"), the whole piece is rejected and redone; expansion and shrinking are held to a length ratio instead of quietly doubling. Chat models love to slip in facts while polishing.
+2. **Versions survive** — every change is stored as a version you can roll back and compare. Close a chat window and the previous draft is gone; "that earlier sentence was better" becomes memory only.
+3. **Data stays local** — drafts and version history live in local SQLite, and unpublished writing is not uploaded; a model call sends only the current version.
+4. **Offline covers half** — with no key the rule layer still cleans spacing, removes repeated words, swaps formal/casual wording and extracts sentences for shrinking; expansion returns a four-slot skeleton and says outright that offline will not invent content.
+
+## 🎯 Use cases
+
+- **Turning meeting notes into a report**: drop the shorthand notes in and run `rewrite --style formal`, then compare versions to see which words changed.
+- **Cutting an article to a limit**: a submission caps at 800 words; `shrink` reduces by ratio, and you check no key number was lost.
+- **Coming up with titles**: one piece for three channels, `title` returns ten candidates and you refine three.
+
+## 🗺 Roadmap
+
+- **Configurable style word lists**: formal/casual replacements in a config file tuned to your industry.
+- **Paragraph-level diff**: mark which paragraph changed and show both versions side by side.
+- **Markdown export**: write the current version to a file for another editor.
+- **Version tree**: several branches evolving from one draft, not just a linear history.
+- **Sensitive phrasing check**: scan for absolutes and unusable wording before submitting.
+
+## ❓ FAQ
+
+**Where do I get an API key?**
+The project ships without one. It talks to DeepSeek (`https://api.deepseek.com`) by default — set `LLM_API_KEY`. Any OpenAI-compatible endpoint works.
+
+**Where is data stored, and is it uploaded?**
+Drafts and version history are in local SQLite (default `data/bigeng.db`); a model call sends only the version being edited.
+
+**Does it work without a key?**
+Cleaning, replacement, shrinking and titles work in rule mode; expansion returns a skeleton and will not invent content. That is the boundary, not a workaround.
+
+**How do I switch models?**
+Change `LLM_BASE_URL`, `LLM_MODEL` and `LLM_API_KEY`, or override per run with `--model`.
+
+**Why reject the whole piece when a number changes?**
+Because rewriting must not change facts. A new number is either in the original unnoticed or invented by the model; both should send it back, not through.
 
 ## How it works
 
