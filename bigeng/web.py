@@ -13,7 +13,7 @@ from .db import Database
 PAGE = """<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>笔耕 · 写作助手</title>
+<title>笔耕 · 这一句改不改</title>
 <style>
 :root{--bg:#faf7f2;--card:#fff;--ink:#2c2620;--dim:#7b7168;--accent:#b5651d;--line:#e8dfd3}
 *{box-sizing:border-box}
@@ -35,15 +35,71 @@ button:disabled{opacity:.55;cursor:wait}
 .list div{padding:8px 0;border-bottom:1px dashed var(--line);display:flex;gap:12px;align-items:center}
 .list div span{color:var(--dim);font-size:13px}
 a{color:var(--accent);cursor:pointer;text-decoration:none}
+
+h1{font-size:clamp(31px,5vw,39px);line-height:1.26}
+.prod{display:block;font-size:11px;line-height:1.4;letter-spacing:.18em;font-weight:650;margin-bottom:8px;opacity:.72}
+.lede,.sub{max-width:62ch;line-height:1.75}
+.route{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:0 0 20px;border:1px solid var(--line);background:var(--line)}
+.route span{padding:11px 13px;background:var(--card);font-size:12px;line-height:1.5}
+.route b{display:block;font-size:10px;letter-spacing:.1em;margin-bottom:3px;opacity:.66}
+button{min-height:46px}
+input,select{min-height:44px}
+@media(max-width:680px){
+  .wrap{padding:20px 16px 56px}
+  .route{grid-template-columns:1fr}
+  h1{font-size:30px!important}
+  .row>div{min-width:100%!important}
+  button{width:100%}
+}
+
+body{background:#f7f2e8;color:#1f2328;font-family:"Songti SC","SimSun",Georgia,serif}
+.wrap{max-width:960px;position:relative}
+.wrap::before{content:"";position:absolute;left:8px;top:0;bottom:0;width:1px;background:#d8b7b0}
+header{padding:8px 0 20px;margin-bottom:20px;border-bottom:1px solid #cfc4b3}
+header h1{font-size:38px;line-height:1.25}
+header p{color:#6e675d;font-size:14px;font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+.card{background:#fffdf8;border:1px solid #d8d0c2;border-radius:2px;box-shadow:0 1px 0 #e9e1d4}
+button{background:#2456a6;border-radius:2px;font-family:"PingFang SC","Microsoft YaHei",sans-serif;letter-spacing:.05em}
+button:hover{background:#1d4789}
+textarea,input,select{background:#fffefa;border-color:#d5caba;border-radius:2px}
+textarea:focus,input:focus,select:focus{border-color:#2456a6;box-shadow:0 0 0 2px #d5e0f0}
+.item{border-left:3px solid #2456a6}
+h3{color:#2456a6;letter-spacing:.08em}
+
+
+/* palette-normalized */
+:root{--bg:#f7f2e8;--card:#fffdf8;--ink:#1f2328;--text:#1f2328;--dim:#6e675d;--line:#d8d0c2;--accent:#2456a6}
+
+/* polish-batch1 */
+button.ghost,button.secondary{background:transparent!important;color:#2456a6!important;border:1px solid #d8d0c2!important}
+
+/* mobile-32 */
+
+@media(max-width:760px){
+  main{grid-template-columns:1fr!important}
+  aside{border-right:0!important;border-bottom:1px solid #d8d0c2;width:auto!important}
+  section{padding:16px!important}
+  .row{flex-wrap:wrap!important}
+  .row>div{min-width:100%!important}
+  h1{font-size:30px!important}
+  .route{grid-template-columns:1fr!important}
+  button{min-height:48px}
+  pre{overflow-x:auto}
+}
+
+/* mobile-height */
+@media(max-width:760px){main{min-height:auto!important}aside{min-height:0!important}}
 </style></head><body><div class="wrap">
-<h1>笔耕 <span id="st" class="badge"></span></h1>
-<p class="sub">稿子存在本机 SQLite,改写走你配置的模型;没有 key 就用规则引擎。</p>
+<h1><span class="prod">笔耕</span>这一句，改还是不改 <span id="st" class="badge"></span></h1>
+<p class="sub">给手里已有稿子的中文作者：锁住人名、术语、数字和直接引语，逐段看删改，点选采纳，随时退回保存版本。</p>
 <div class="tabs">
   <div class="tab on" data-t="list">稿子</div>
   <div class="tab" data-t="new">新建</div>
   <div class="tab" data-t="run">改写</div>
 </div>
 
+
+  <div class="route" aria-label="任务步骤"><span><b>01</b>先锁事实</span><span><b>02</b>逐句看删改</span><span><b>03</b>导出干净稿</span></div>
 <div class="card" id="p-list">
   <div class="list" id="drafts">加载中…</div>
 </div>
