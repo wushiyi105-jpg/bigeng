@@ -89,6 +89,20 @@ button.ghost,button.secondary{background:transparent!important;color:#2456a6!imp
 
 /* mobile-height */
 @media(max-width:760px){main{min-height:auto!important}aside{min-height:0!important}}
+
+/* mobile-sticky-cta */
+.mobile-cta{display:none}
+@media(max-width:760px){
+  body{padding-bottom:88px}
+  .route{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .route span{padding:8px 8px!important;font-size:11px!important;line-height:1.35!important}
+  .route b{font-size:9px!important;margin-bottom:1px!important}
+  .mobile-cta{position:fixed;left:12px;right:12px;bottom:12px;z-index:80;display:flex;
+    padding:8px;border:1px solid rgba(0,0,0,.08);border-radius:12px;
+    background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
+    box-shadow:0 10px 28px rgba(16,24,40,.18)}
+  .mobile-cta button{width:100%;min-height:52px;margin:0!important;font-size:15px}
+}
 </style></head><body><div class="wrap">
 <h1><span class="prod">笔耕</span>这一句，改还是不改 <span id="st" class="badge"></span></h1>
 <p class="sub">给手里已有稿子的中文作者：锁住人名、术语、数字和直接引语，逐段看删改，点选采纳，随时退回保存版本。</p>
@@ -168,7 +182,28 @@ $('btnRun').onclick=async()=>{
 (async()=>{try{const s=await api('/api/status');
   const b=$('st');b.textContent=s.mock?'离线模式':'模型模式';b.style.background=s.mock?'#f6e3d0':'#dff0e2';b.style.color=s.mock?'#8a4a12':'#245c31';
 }catch(e){} await loadDrafts();})();
-</script></body></html>"""
+</script>
+<script>
+(function(){
+  var want = "新建";
+  function norm(t){ return String(t||'').replace(/\s+/g,''); }
+  var all=[].slice.call(document.querySelectorAll('button'));
+  var src=null, fallback=null;
+  for(var i=0;i<all.length;i++){
+    var b=all[i];
+    if(b.offsetParent===null||b.disabled) continue;
+    if(!fallback) fallback=b;
+    if(norm(b.textContent).indexOf(norm(want))>=0){ src=b; break; }
+  }
+  if(!src) src=fallback;
+  if(!src) return;
+  var bar=document.createElement('div'); bar.className='mobile-cta';
+  var btn=src.cloneNode(true); btn.removeAttribute('id'); btn.type='button';
+  btn.addEventListener('click',function(e){e.preventDefault(); src.click();});
+  bar.appendChild(btn); document.body.appendChild(bar);
+})();
+</script>
+</body></html>"""
 
 
 class _Handler(BaseHTTPRequestHandler):
@@ -295,3 +330,5 @@ def serve(host: str = "127.0.0.1", port: int = 8000, db_path: str | None = None,
 
 if __name__ == "__main__":
     serve()
+
+
